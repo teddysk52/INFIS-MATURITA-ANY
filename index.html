@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <title>INFIS: MATURITA ANY%</title>
+  <meta name="description" content="4 roky. 10 minut. 1 maturita.">
+  <link rel="stylesheet" href="fonts/fonts.css">
+  <link rel="stylesheet" href="style.css?v=16">
+</head>
+<body>
+  <canvas id="gl"></canvas>
+  <div id="world-ui"></div>
+
+  <!-- HUD -->
+  <div id="hud" class="hidden">
+    <div id="hud-left">
+      <div id="year-badge"><b id="year-num">1. ROČNÍK</b></div>
+      <div id="room-name"></div>
+    </div>
+    <div id="hud-timer"><div id="timer">10:00</div></div>
+    <div id="hud-right"><div id="objectives"></div></div>
+    <canvas id="minimap" width="220" height="220"></canvas>
+    <div id="prompt" class="hidden"></div>
+    <div id="mt-panel" class="hidden"><span class="mt-name">MATURITRON</span><span id="mt-text"></span></div>
+    <div id="arena-hud" class="hidden">
+      <div id="arena-title"></div>
+      <div id="arena-bar"><i></i></div>
+      <div id="arena-hint"></div>
+    </div>
+    <div id="car-hud" class="hidden"><b id="speedo">0</b><span>km/h</span></div>
+    <div id="toasts"></div>
+    <div id="bigtitle"></div>
+    <div id="popups"></div>
+    <div id="qte" class="hidden"></div>
+    <div id="hit-vignette"></div>
+  </div>
+
+  <!-- DIALOG -->
+  <div id="dialogue" class="hidden">
+    <div class="dl-inner">
+      <div class="dl-portrait"><canvas id="portrait" width="40" height="40"></canvas></div>
+      <div class="dl-body">
+        <div id="dl-name"></div>
+        <div id="dl-text"></div>
+        <div id="dl-choices"></div>
+      </div>
+      <div id="dl-hint">▾</div>
+    </div>
+  </div>
+
+  <div id="yearcard" class="hidden"><div class="yc-num"></div><div class="yc-sub"></div><div class="yc-note"></div></div>
+  <div id="fade"></div>
+
+  <!-- MENU -->
+  <div id="menu" class="screen hidden">
+    <div class="title-wrap">
+      <h1><span class="t-infis">INFIS</span><span class="t-any">MATURITA ANY%</span></h1>
+      <nav class="menu-list">
+        <button data-act="start">Hrát</button>
+        <button data-act="howto">Ovládání</button>
+        <button data-act="settings">Nastavení</button>
+        <button data-act="achievements">Úspěchy</button>
+      </nav>
+      <div id="ai-status" class="ai-status"></div>
+    </div>
+  </div>
+
+  <div id="howto" class="screen hidden">
+    <div class="card">
+      <h2>Ovládání</h2>
+      <div class="keys">
+        <div><kbd>W A S D</kbd><span>Pohyb</span></div>
+        <div><kbd>Myš</kbd><span>Kamera</span></div>
+        <div><kbd>Shift</kbd><span>Sprint</span></div>
+        <div><kbd>E</kbd><span>Použít</span></div>
+        <div><kbd>Mezerník</kbd><span>Skok</span></div>
+        <div><kbd>F</kbd><span>Auto</span></div>
+        <div><kbd>V</kbd><span>Pohled</span></div>
+        <div><kbd>Esc</kbd><span>Pauza</span></div>
+      </div>
+      <button data-act="back" class="primary">Zpět</button>
+    </div>
+  </div>
+
+  <div id="settings" class="screen hidden">
+    <div class="card">
+      <h2>Nastavení</h2>
+      <div class="settings-list">
+        <label><span>Zvuky</span><input type="checkbox" data-set="sfx"></label>
+        <label><span>Hudba</span><input type="checkbox" data-set="music"></label>
+        <label><span>Hlas MATURITRONA</span><input type="checkbox" data-set="voice"></label>
+        <label><span>Čas stojí při dialozích</span><input type="checkbox" data-set="pauseDialog"></label>
+        <label><span>Pixelový filtr</span><input type="checkbox" data-set="pixel"></label>
+        <label><span>Stíny</span><input type="checkbox" data-set="shadows"></label>
+        <label><span>Obrátit osu Y</span><input type="checkbox" data-set="invertY"></label>
+        <label><span>Citlivost myši</span><input type="range" min="0.3" max="2.5" step="0.1" data-set="sens"></label>
+      </div>
+      <button data-act="back" class="primary">Zpět</button>
+    </div>
+  </div>
+
+  <div id="achievements" class="screen hidden">
+    <div class="card wide">
+      <h2>Úspěchy <small id="ach-count"></small></h2>
+      <div id="ach-list"></div>
+      <button data-act="back" class="primary">Zpět</button>
+    </div>
+  </div>
+
+  <div id="pause" class="screen hidden">
+    <div class="title-wrap">
+      <h2 class="screen-title">Pauza</h2>
+      <nav class="menu-list">
+        <button data-act="resume">Pokračovat</button>
+        <button data-act="settings">Nastavení</button>
+        <button data-act="restart">Začít znovu</button>
+        <button data-act="mainmenu">Hlavní menu</button>
+      </nav>
+    </div>
+  </div>
+
+  <div id="gameover" class="screen hidden">
+    <div class="end">
+      <div class="end-title red">Čas vypršel</div>
+      <div class="end-sub">Věčný student</div>
+      <div class="end-stats" id="go-stats"></div>
+      <nav class="menu-list row">
+        <button data-act="restart">Zkusit znovu</button>
+        <button data-act="mainmenu">Menu</button>
+      </nav>
+    </div>
+  </div>
+
+  <div id="victory" class="screen hidden">
+    <div class="end">
+      <div class="end-title green">Maturita složena</div>
+      <div class="vic-lines"><div>4 roky studia.</div><div>10 minut utrpení.</div><div>0 praktických zkušeností.</div></div>
+      <div class="end-stats" id="vic-stats"></div>
+      <div class="unlock">Nový level odemčen: <b>Úřad práce</b></div>
+      <div id="vs-error" class="hidden">ERROR: MENTÁLNÍ KAPACITA NEDOSTATEČNÁ</div>
+      <nav class="menu-list row">
+        <button data-act="uni">Pokračovat na vysokou</button>
+        <button data-act="credits">Titulky</button>
+        <button data-act="restart">Hrát znovu</button>
+      </nav>
+    </div>
+  </div>
+
+  <div id="credits" class="screen hidden">
+    <div class="credits-roll" id="credits-roll"></div>
+    <button data-act="mainmenu" class="credits-btn">Menu</button>
+  </div>
+
+  <div id="loading"><div class="ld-title">INFIS</div><div class="ld-bar"><i id="ld-bar"></i></div><div id="ld-text"></div></div>
+
+  <script src="js/config.js?v=16"></script>
+  <script src="voice/voices.js?v=16"></script>
+  <script src="js/util.js?v=16"></script>
+  <script src="js/math.js?v=16"></script>
+  <script src="js/gl.js?v=16"></script>
+  <script src="js/textures.js?v=16"></script>
+  <script src="js/mesh.js?v=16"></script>
+  <script src="js/collision.js?v=16"></script>
+  <script src="js/world.js?v=16"></script>
+  <script src="js/characters.js?v=16"></script>
+  <script src="js/vehicles.js?v=16"></script>
+  <script src="js/audio.js?v=16"></script>
+  <script src="js/entities.js?v=16"></script>
+  <script src="assets/icons/manifest.js?v=16"></script>
+  <script src="js/icons.js?v=16"></script>
+  <script src="js/achievements.js?v=16"></script>
+  <script src="js/ui.js?v=16"></script>
+  <script src="js/dialogue.js?v=16"></script>
+  <script src="js/arenas.js?v=16"></script>
+  <script src="js/minigames.js?v=16"></script>
+  <script src="js/director.js?v=16"></script>
+  <script src="js/story.js?v=16"></script>
+  <script src="js/main.js?v=16"></script>
+</body>
+</html>

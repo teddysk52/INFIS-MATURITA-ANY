@@ -1,0 +1,151 @@
+/* =============================================================
+   INFIS: MATURITA ANY% — minimalistický herní styl
+   Jediný font: Pixelify Sans (plná podpora češtiny)
+   ============================================================= */
+:root {
+  --u: 1;                    /* měřítko — nastavuje game.js podle velikosti okna */
+  --bg: #0b0912;
+  --ink: #f4f0ff;
+  --dim: #8d84a8;
+  --mute: #5a5270;
+  --accent: #ffd34d;
+  --red: #ff4d5e;
+  --green: #49e08a;
+  --blue: #7cc4ff;
+  --card: rgba(13, 10, 22, .9);
+  --line: rgba(255, 255, 255, .12);
+  --font: "Pixelify Sans", system-ui, sans-serif;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: #050409; color: var(--ink); overflow: hidden; font-family: var(--font); }
+#wrap { width: 100vw; height: 100vh; display: flex; align-items: center; justify-content: center; background: #050409; }
+#game { position: relative; width: 960px; height: 540px; overflow: hidden; }
+#screen { display: block; width: 100%; height: 100%; image-rendering: pixelated; background: var(--bg); }
+
+/* ---------- obrazovky přes canvas ---------- */
+.overlay {
+  position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center;
+  font-size: calc(var(--u) * 22px); line-height: 1.25; text-align: center; padding: calc(var(--u) * 40px);
+  animation: fadein .35s ease-out;
+}
+.overlay.hidden, .hidden { display: none !important; }
+@keyframes fadein { from { opacity: 0; } to { opacity: 1; } }
+p { margin: calc(var(--u) * 6px) 0; }
+h1, h2 { margin: 0; font-weight: 700; letter-spacing: .02em; }
+.dim { color: var(--dim); }
+.small { font-size: .8em; }
+
+/* ---------- tlačítka: čistý text, akcent při výběru ---------- */
+button {
+  font-family: var(--font); font-weight: 600; font-size: calc(var(--u) * 24px);
+  color: var(--dim); background: none; border: 0; cursor: pointer;
+  padding: calc(var(--u) * 6px) calc(var(--u) * 14px) calc(var(--u) * 6px) calc(var(--u) * 26px);
+  position: relative; text-align: left; letter-spacing: .03em;
+  transition: color .12s, transform .12s;
+}
+button::before {
+  content: ""; position: absolute; left: calc(var(--u) * 6px); top: 50%;
+  width: calc(var(--u) * 8px); height: calc(var(--u) * 8px); margin-top: calc(var(--u) * -4px);
+  background: var(--accent); transform: scale(0); transition: transform .12s;
+}
+button:hover, button:focus { outline: none; color: var(--ink); transform: translateX(calc(var(--u) * 6px)); }
+button:hover::before, button:focus::before { transform: scale(1); }
+.buttons { display: flex; flex-direction: column; align-items: flex-start; gap: calc(var(--u) * 2px); margin-top: calc(var(--u) * 14px); }
+.buttons.row { flex-direction: row; flex-wrap: wrap; justify-content: center; gap: calc(var(--u) * 12px); }
+
+/* ---------- hlavní menu (titulní obrazovka) ---------- */
+#menu {
+  align-items: flex-start; justify-content: center; text-align: left;
+  padding: 0 calc(var(--u) * 80px);
+  background: linear-gradient(90deg, rgba(8,6,14,.94) 0%, rgba(8,6,14,.78) 38%, rgba(8,6,14,.15) 70%, rgba(8,6,14,0) 100%);
+}
+.title-small {
+  font-size: calc(var(--u) * 18px); letter-spacing: .5em; color: var(--blue); font-weight: 600;
+  margin-bottom: calc(var(--u) * 6px);
+}
+.title { font-size: calc(var(--u) * 92px); line-height: .9; color: var(--ink); text-shadow: 0 calc(var(--u) * 6px) 0 rgba(0,0,0,.45); }
+.title span { display: block; color: var(--accent); font-size: .62em; letter-spacing: .06em; margin-top: calc(var(--u) * 6px); }
+.tagline { font-size: calc(var(--u) * 22px); color: var(--dim); margin: calc(var(--u) * 14px) 0 calc(var(--u) * 26px); }
+#menu .buttons { margin-top: 0; }
+#menu button { font-size: calc(var(--u) * 28px); }
+.menu-foot {
+  position: absolute; left: calc(var(--u) * 80px); right: calc(var(--u) * 30px); bottom: calc(var(--u) * 24px);
+  display: flex; justify-content: space-between; font-size: calc(var(--u) * 15px); color: var(--mute); letter-spacing: .04em;
+}
+#ai-status::before { content: "● "; color: var(--mute); }
+#ai-status.online::before { color: var(--green); }
+
+/* ---------- karty (pauza, nastavení, jak hrát) ---------- */
+.overlay.panel { background: rgba(5,4,10,.72); backdrop-filter: blur(2px); }
+.overlay.panel > * { position: relative; }
+.card {
+  background: var(--card); border: 1px solid var(--line); border-radius: calc(var(--u) * 6px);
+  padding: calc(var(--u) * 30px) calc(var(--u) * 40px); min-width: calc(var(--u) * 420px);
+  box-shadow: 0 calc(var(--u) * 20px) calc(var(--u) * 60px) rgba(0,0,0,.5);
+  display: flex; flex-direction: column; align-items: flex-start; text-align: left;
+}
+.card h2 { font-size: calc(var(--u) * 34px); color: var(--ink); margin-bottom: calc(var(--u) * 4px); }
+.card .eyebrow { font-size: calc(var(--u) * 14px); letter-spacing: .3em; color: var(--accent); font-weight: 600; margin-bottom: calc(var(--u) * 6px); }
+
+.cols { display: grid; grid-template-columns: 1fr 1fr; gap: calc(var(--u) * 36px); text-align: left; max-width: calc(var(--u) * 820px); margin: calc(var(--u) * 12px) 0 calc(var(--u) * 10px); font-size: calc(var(--u) * 19px); }
+.cols p { margin: calc(var(--u) * 7px) 0; }
+kbd {
+  font-family: var(--font); font-size: .8em; font-weight: 700; display: inline-block; min-width: 1.6em; text-align: center;
+  background: rgba(255,255,255,.1); color: var(--ink); border: 1px solid var(--line); border-radius: calc(var(--u) * 4px);
+  padding: 0 calc(var(--u) * 5px); margin-right: calc(var(--u) * 3px);
+}
+
+/* ---------- konec hry / vítězství ---------- */
+#gameover, #victory { background: radial-gradient(ellipse at center, rgba(10,6,18,.82), rgba(4,3,8,.96)); }
+.big { font-size: calc(var(--u) * 64px); line-height: 1; }
+.red { color: var(--red); }
+.gold { color: var(--accent); }
+.lead { font-size: calc(var(--u) * 30px); color: var(--ink); margin-top: calc(var(--u) * 10px); }
+.ach { color: var(--accent); font-weight: 700; font-size: calc(var(--u) * 28px); letter-spacing: .06em; }
+.trio { display: flex; gap: calc(var(--u) * 26px); justify-content: center; font-size: calc(var(--u) * 19px); color: var(--dim); margin: calc(var(--u) * 10px) 0 calc(var(--u) * 4px); }
+.trio span:nth-child(3) { color: #ff9aa5; }
+.unlock { font-size: calc(var(--u) * 22px); color: var(--blue); }
+.unlock b { color: var(--accent); }
+.stats { display: flex; gap: calc(var(--u) * 40px); justify-content: center; margin: calc(var(--u) * 12px) 0; }
+.stats div { display: flex; flex-direction: column; align-items: center; }
+.stats span { color: var(--mute); font-size: calc(var(--u) * 14px); letter-spacing: .15em; }
+.stats b { font-size: calc(var(--u) * 30px); color: var(--ink); }
+.achlist { display: flex; flex-wrap: wrap; gap: calc(var(--u) * 6px); justify-content: center; max-width: calc(var(--u) * 820px); max-height: calc(var(--u) * 84px); overflow: hidden; font-size: calc(var(--u) * 14px); }
+.achlist span { background: rgba(255,211,77,.08); border: 1px solid rgba(255,211,77,.25); border-radius: calc(var(--u) * 3px); padding: calc(var(--u) * 1px) calc(var(--u) * 7px); color: var(--accent); }
+#victory .buttons.row button, #gameover .buttons.row button { font-size: calc(var(--u) * 22px); }
+
+.errwin { background: #c3c3c3; color: #111; border: calc(var(--u) * 2px) solid #fff; box-shadow: calc(var(--u) * 6px) calc(var(--u) * 6px) 0 #000; width: calc(var(--u) * 620px); padding-bottom: calc(var(--u) * 16px); animation: shakeit .35s 2; text-align: center; }
+.errbar { background: linear-gradient(90deg, #0a2a8a, #2a62d4); color: #fff; text-align: left; padding: calc(var(--u) * 4px) calc(var(--u) * 10px); display: flex; justify-content: space-between; font-size: calc(var(--u) * 17px); font-weight: 700; }
+.errbar span { background: #c0392b; padding: 0 calc(var(--u) * 6px); }
+.errtxt { color: #b00020; font-weight: 700; font-size: calc(var(--u) * 28px); margin: calc(var(--u) * 20px) calc(var(--u) * 10px) calc(var(--u) * 6px); }
+.errwin .dim { color: #444; }
+.errwin button { color: #111; background: #ddd; border: 1px solid #fff; box-shadow: 1px 1px 0 #444; padding: calc(var(--u) * 6px) calc(var(--u) * 30px); margin-top: calc(var(--u) * 12px); text-align: center; }
+.errwin button::before { display: none; }
+.errwin button:focus, .errwin button:hover { background: var(--accent); transform: none; }
+@keyframes shakeit { 0%,100% { transform: translateX(0); } 25% { transform: translateX(calc(var(--u) * -10px)); } 75% { transform: translateX(calc(var(--u) * 10px)); } }
+
+.credits { font-size: calc(var(--u) * 19px); color: var(--dim); animation: rise .8s ease-out; }
+.credits p { margin: calc(var(--u) * 3px) 0; }
+.credits b { color: var(--ink); }
+.credits .who { color: var(--ink); }
+@keyframes rise { from { transform: translateY(calc(var(--u) * 30px)); opacity: 0; } to { transform: none; opacity: 1; } }
+
+/* ---------- dotykové ovládání ---------- */
+#touch { position: absolute; inset: 0; pointer-events: none; z-index: 5; }
+#touch button {
+  pointer-events: auto; padding: 0; position: absolute; text-align: center; transform: none;
+  width: calc(var(--u) * 78px); height: calc(var(--u) * 78px);
+  font-size: calc(var(--u) * 26px); color: rgba(255,255,255,.8);
+  background: rgba(13,10,22,.45); border: 1px solid rgba(255,255,255,.25); border-radius: calc(var(--u) * 14px);
+  touch-action: none; user-select: none; -webkit-user-select: none;
+}
+#touch button::before { display: none; }
+#touch button.on { background: rgba(255,211,77,.85); color: #1a1322; }
+.dpad { position: absolute; left: calc(var(--u) * 24px); bottom: calc(var(--u) * 24px); width: calc(var(--u) * 234px); height: calc(var(--u) * 234px); }
+.t-up { left: calc(var(--u) * 78px); top: 0; } .t-down { left: calc(var(--u) * 78px); bottom: 0; }
+.t-left { left: 0; top: calc(var(--u) * 78px); } .t-right { right: 0; top: calc(var(--u) * 78px); }
+.tbtns { position: absolute; right: calc(var(--u) * 24px); bottom: calc(var(--u) * 24px); width: calc(var(--u) * 260px); height: calc(var(--u) * 200px); }
+.t-e { right: 0; bottom: calc(var(--u) * 30px); width: calc(var(--u) * 110px) !important; height: calc(var(--u) * 110px) !important; border-radius: 50% !important; font-weight: 700; }
+.t-run { right: calc(var(--u) * 130px); bottom: 0; font-size: calc(var(--u) * 16px) !important; border-radius: 50% !important; }
+.t-small { right: calc(var(--u) * 130px); top: 0; height: calc(var(--u) * 50px) !important; font-size: calc(var(--u) * 15px) !important; }
+.overlay:not(.hidden) ~ #touch { display: none; }

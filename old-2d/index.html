@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>INFIS: MATURITA ANY%</title>
+  <meta name="description" content="4 roky. 10 minut. 1 maturita. Pixel-art komediální hra o přežití střední školy INFIS.">
+  <link rel="stylesheet" href="fonts/fonts.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="wrap">
+    <div id="game">
+      <canvas id="screen" width="960" height="540"></canvas>
+
+      <!-- HLAVNÍ MENU -->
+      <div id="menu" class="overlay">
+        <div class="title-small">INFIS · PLZEŇ</div>
+        <h1 class="title">MATURITA<span>ANY%</span></h1>
+        <div class="tagline">4 roky. 10 minut. 1 maturita.</div>
+        <div class="buttons">
+          <button data-action="start">Hrát</button>
+          <button data-action="howto">Jak hrát</button>
+          <button data-action="settings">Nastavení</button>
+        </div>
+        <div class="menu-foot">
+          <span id="ai-status">MATURITRON: offline režim</span>
+          <span id="ach-count"></span>
+        </div>
+      </div>
+
+      <!-- JAK HRÁT -->
+      <div id="howto" class="overlay panel hidden">
+        <div class="card">
+          <div class="eyebrow">NÁVOD</div>
+          <h2>Jak hrát</h2>
+          <div class="cols">
+            <div>
+              <p><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> / šipky — pohyb</p>
+              <p><kbd>Shift</kbd> — sprint (neříkej to učitelům)</p>
+              <p><kbd>E</kbd> / <kbd>Mezerník</kbd> — mluvit, zkoumat, přeskočit text</p>
+              <p><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd> — volby v dialogu</p>
+              <p><kbd>Esc</kbd> — pauza</p>
+            </div>
+            <div>
+              <p>Máš <b>10 minut</b> na 4 ročníky a maturitu.</p>
+              <p>Úkoly jsou vpravo nahoře, žlutá šipka ukazuje cestu, <b>!</b> označuje učitele s misí.</p>
+              <p>Zásah = <b>mínus pár sekund</b>. Prohrát se dá jen časem.</p>
+              <p class="dim">MATURITRON 3000 tě bude zdržovat. Občas omylem pomůže.</p>
+            </div>
+          </div>
+          <div class="buttons"><button data-action="back">Zpět</button></div>
+        </div>
+      </div>
+
+      <!-- NASTAVENÍ -->
+      <div id="settings" class="overlay panel hidden">
+        <div class="card">
+          <div class="eyebrow">MOŽNOSTI</div>
+          <h2>Nastavení</h2>
+          <div class="buttons">
+            <button data-action="toggle-sfx">Zvukové efekty</button>
+            <button data-action="toggle-music">Hudba</button>
+            <button data-action="toggle-voice">Hlas MATURITRONA</button>
+            <button data-action="toggle-shake">Třesení obrazovky</button>
+            <button data-action="toggle-slow">Čas stojí při dialozích</button>
+            <button data-action="back">Zpět</button>
+          </div>
+          <p class="dim small">„Čas stojí při dialozích“ = klidnější režim pro prezentaci před třídou.</p>
+        </div>
+      </div>
+
+      <!-- PAUZA -->
+      <div id="pause" class="overlay panel hidden">
+        <div class="card">
+          <div class="eyebrow">PAUZA</div>
+          <h2>Chvilka klidu</h2>
+          <p class="dim">MATURITRON mezitím čeká. Netrpělivě.</p>
+          <div class="buttons">
+            <button data-action="resume">Pokračovat</button>
+            <button data-action="mute">Ztlumit zvuk</button>
+            <button data-action="settings">Nastavení</button>
+            <button data-action="restart">Začít znovu</button>
+            <button data-action="menu">Hlavní menu</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- KONEC HRY -->
+      <div id="gameover" class="overlay hidden">
+        <h2 class="big red">GAME OVER</h2>
+        <p class="lead">Čas vypršel.</p>
+        <p>Gratulujeme! Právě jsi získal achievement:</p>
+        <p class="ach">🏆 VĚČNÝ STUDENT</p>
+        <p class="dim">Uvidíme se v září. Zase.</p>
+        <div class="buttons row">
+          <button data-action="restart">Zkusit znovu</button>
+          <button data-action="menu">Hlavní menu</button>
+        </div>
+      </div>
+
+      <!-- VÍTĚZSTVÍ -->
+      <div id="victory" class="overlay hidden">
+        <div id="v-main">
+          <h2 class="big gold">MATURITA ÚSPĚŠNĚ SLOŽENA!</h2>
+          <p class="lead">GRATULUJEME!</p>
+          <div class="trio"><span>4 ROKY STUDIA.</span><span>10 MINUT UTRPENÍ.</span><span>0 PRAKTICKÝCH ZKUŠENOSTÍ.</span></div>
+          <p class="unlock">NOVÝ LEVEL ODEMČEN: <b>ÚŘAD PRÁCE</b></p>
+          <div id="v-stats" class="stats"></div>
+          <div id="v-ach" class="achlist"></div>
+          <div class="buttons row">
+            <button data-action="university">Pokračovat na vysokou školu</button>
+            <button data-action="credits">Titulky</button>
+          </div>
+        </div>
+        <div id="v-error" class="hidden">
+          <div class="errwin">
+            <div class="errbar">Systém <span>x</span></div>
+            <p class="errtxt">ERROR: MENTÁLNÍ KAPACITA NEDOSTATEČNÁ</p>
+            <p class="dim">Kód chyby: 0xMATURA. Zkuste to po prázdninách.</p>
+            <button data-action="credits">OK… :(</button>
+          </div>
+        </div>
+        <div id="v-credits" class="hidden">
+          <h2 class="gold" style="font-size:calc(var(--u)*34px);margin-bottom:calc(var(--u)*10px)">Titulky</h2>
+          <div class="credits">
+            <p><b>INFIS: MATURITA ANY%</b></p>
+            <p>Hru vytvořil: <b id="credit-author"></b></p>
+            <p class="dim">Hrají (všechny dialogy jsou smyšlené):</p>
+            <p>Adam Hojer — C# Čaroděj · Vladimír Nágr — Mistr Debuggingu</p>
+            <p>Tobiáš Horváth — Sběratel Dat · Jan Novák — Strážce Angličtiny</p>
+            <p>Eva Baťková — Jazyková Přepínačka · Ondřej Janda — Strážce Literatury</p>
+            <p>Miroslav Prynych — Excelový Císař · Adam Láďman — Boss Ekonomiky</p>
+            <p>a legendární Olga Břízová — Matematika nikdy nekončí</p>
+            <p>MATURITRON 3000 — sám sebe</p>
+            <p class="dim">Při tvorbě nebyl zraněn žádný učitel. Jen Excel.</p>
+          </div>
+          <div class="buttons row">
+            <button data-action="restart">Hrát znovu</button>
+            <button data-action="menu">Hlavní menu</button>
+          </div>
+        </div>
+      </div>
+      <!-- DOTYKOVÉ OVLÁDÁNÍ (zobrazí se jen na mobilu/tabletu) -->
+      <div id="touch" class="hidden">
+        <div class="dpad">
+          <button data-key="arrowup" class="t-up">▲</button>
+          <button data-key="arrowleft" class="t-left">◀</button>
+          <button data-key="arrowright" class="t-right">▶</button>
+          <button data-key="arrowdown" class="t-down">▼</button>
+        </div>
+        <div class="tbtns">
+          <button data-key="escape" class="t-small">ESC</button>
+          <button data-key="shift" class="t-run">RUN</button>
+          <button data-key="e" class="t-e">E</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="voice/voices.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/input.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/sprites.js"></script>
+  <script src="js/world.js"></script>
+  <script src="js/lighting.js"></script>
+  <script src="js/dialogue.js"></script>
+  <script src="js/achievements.js"></script>
+  <script src="js/minigames.js"></script>
+  <script src="js/director.js"></script>
+  <script src="js/story.js"></script>
+  <script src="js/game.js"></script>
+</body>
+</html>
